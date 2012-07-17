@@ -1,0 +1,185 @@
+<!--
+@author - Vikesh Khanna (with help from Abhineet Garg :) )
+-->
+
+<html>
+	<head>
+		<script id="bms" type="text/javascript" src="http://in.bookmyshow.com/data/js/GetEvents_MT.js?20120717120045"> </script>
+	
+		<script>
+			var cityCode = localStorage["cityCode"];
+			var eventName = localStorage["eventName"];
+			var audio;
+			var enabled = true;
+			
+			//var eventCode = "ET00010030"; //TDKR
+			//var eventCode = "ET00009840"; //Testing
+			
+			var timer; 
+			
+			
+			function request(url) {
+				console.log("<tdkr> ajax request received for " + url);
+				
+				var xhr = new XMLHttpRequest();
+				try {
+					xhr.onreadystatechange = function(){
+						if (xhr.readyState != 4)
+							{
+								console.log("<tdkr> ignoring xhr readystate = " + xhr.readyState);
+								return;
+							}
+
+						// When fetch is complete, check if the movie matches
+						if (xhr.responseText) {
+							console.log("<tdkr> responseText received");
+							eval(xhr.responseText);
+							
+							var movies = checkMovie(cityCode, eventName); 
+							
+							if(movies !=null)
+							{
+								console.log("Movies Found!");
+								audio.play();
+								console.log(movies);
+								
+								for(var i=0; i< movies.length; ++i)
+								{
+									showToast("Tickets for " + movies[i] + " are now available. Book them quickly!");
+								}
+								
+								toggleState();
+							}
+							//console.log(xhr.responseText);
+						}
+						else
+						{
+							console.debug("<tdkr> respnseText was empty");
+						}
+					}
+
+					xhr.onerror = function(error) {
+						console.debug(error);
+					}
+
+					xhr.open("GET", url, true);
+					xhr.send(null);
+				} catch(e) {
+					console.error(e);
+				}
+			}
+			
+			function init()
+			{
+				audio = document.getElementById('audio');
+				audio.src = chrome.extension.getURL("audio/beware2.ogg");
+				
+				if(cityCode === undefined || cityCode == null)
+				{
+					cityCode = "HYD";
+				}
+				
+				if(eventName === undefined || eventName == null)
+				{
+					eventName = "Cocktail"; //Cocktail for testing
+				}
+				init_timer();
+				
+				chrome.browserAction.onClicked.addListener(function(tab) {  
+					toggleState();
+				});
+			}
+			
+			function init_timer()
+			{
+				timer = setInterval(function(){
+					var now = new Date();
+					var bustCache = now.getFullYear().toString() + now.getDate().toString() + (now.getMonth() + 1).toString() + now.getHours().toString()
+					+ now.getMinutes().toString() + now.getSeconds().toString();
+					
+					var url = "http://in.bookmyshow.com/data/js/GetEvents_MT.js?" + bustCache;
+					request(url);
+				}, 2000);
+			}
+			
+			function getMovies(cityCode)
+			{
+				var arr = [];
+				var f = aiSRE.toString();
+				
+				for(var b=0;b<aiEV.length;b++)
+				{
+					if(f.match(cityCode+","+aiEV[b][1]) && arr.indexOf(aiEV[b]) == -1)
+					{
+						arr.push(aiEV[b]);
+					}
+				}
+				
+				return arr;
+			}
+			
+			function checkMovie(cityCode, eventName)
+			{
+				var arr = getMovies(cityCode);
+				var movies = [];
+				var f = arr.toString().split(',');
+				eventName = eventName.toLowerCase();
+				console.log(f.toString());
+				
+				for(var i=0; i < f.length; ++i)
+				{
+					if(f[i].toLowerCase().indexOf(eventName) != -1)
+					{
+						console.log("<bms> Adding " + f[i]);
+						movies.push(f[i]);
+					}
+				}
+				//console.log(i);
+				
+				if(movies.length)
+					return movies;
+				else 
+					return null;
+			}
+			
+			function showToast(str)
+			{
+				var notification = window.webkitNotifications.createNotification(chrome.extension.getURL('images/batman2.png'), 'Rise', str);
+			
+				notification.onclose = function()
+				{
+					audio.pause();
+				}
+				
+				notification.onclick = function()
+				{
+					window.open("http://bookmyshow.com");
+				}
+				
+				notification.show();
+			}
+			
+			function toggleState()
+			{
+				enabled = ~enabled;
+				
+				if(enabled < 0)
+				{
+					chrome.browserAction.setIcon({path:"images/icon19_disabled.gif"});
+					clearInterval(timer);
+				}
+				else
+				{
+					chrome.browserAction.setIcon({path:"images/icon19.gif"});
+					init_timer();
+				}
+			}
+			
+		</script>
+	</head>
+<body onload="init();">
+<audio id="audio" loop="loop">
+	<source type="audio/ogg" id="audio_src" />
+</audio>
+</body>	
+</html>

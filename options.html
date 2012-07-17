@@ -1,0 +1,81 @@
+<html>
+	<head>
+		<title> Hack BookMyShow - Options </title>
+	</head>
+	
+	<script type="text/javascript">
+		var cityCode = localStorage["cityCode"];
+		var eventName = localStorage["eventName"];
+			
+		function init()
+		{
+			if(cityCode == undefined || cityCode == null)
+			{
+				cityCode = "HYD";
+			}
+			
+			if(eventName == undefined || eventName == null)
+			{
+				eventName = "Cocktail"; //Cocktail
+			}
+			
+			setDOMFromVars();
+		}
+		
+		function setDOMFromVars()
+		{
+			document.getElementById('cityCode').value = cityCode;
+			document.getElementById('eventName').value = eventName;
+		}
+		
+		function setVarsFromDom()
+		{
+			cityCode = document.getElementById('cityCode').value;
+			eventName = document.getElementById('eventName').value;
+		}
+		
+		function saveData()
+		{
+			setVarsFromDom();
+			localStorage["cityCode"] = cityCode;
+			localStorage["eventName"] = eventName;
+		}
+		
+	</script>
+	
+	<style type="text/css">
+		body
+		{
+			font-family: Arial;
+		}
+		
+		table
+		{
+			border:0px;
+		}
+		
+		tr td
+		{
+			padding:10px;
+		}
+		
+	</style>
+<body onload="init()";>
+	<h1>Hacking BookMyShow</h1>
+	<table>
+		<tr>
+			<td>City Code: </td>
+			<td><input type="text" id="cityCode"></td>
+		</tr>
+		
+		<tr>
+			<td>Event Name: </td>
+			<td><input type="text" id="eventName"></td>
+		</tr>
+		
+		<tr>
+			<td><input type="submit" onclick="saveData();" value="Save" /></td>
+		</tr>
+	</table>
+</body>
+</html>

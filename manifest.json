@@ -1,0 +1,18 @@
+{
+  "name": "BookMyShow Notifications",
+  "version": "1.0",
+  "description": "Alert when a movie booking starts for on BookMyShow",
+  "browser_action": {
+    "default_icon": "images/icon19.gif" // optional
+	},
+  
+  "background_page": "background.html",
+  "permissions": ["tabs", "http://in.bookmyshow.com/", "notifications"],
+   "options_page": "options.html",
+   
+   "icons": {
+    "48": "images/icon48.jpg",
+    "128": "images/icon128.jpg",
+    "256": "images/icon256.jpg"
+  }
+}
