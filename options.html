@@ -4,41 +4,30 @@
 	</head>
 	
 	<script type="text/javascript">
-		var cityCode = localStorage["cityCode"];
-		var eventName = localStorage["eventName"];
-			
+		var bkg = chrome.extension.getBackgroundPage();
+	
 		function init()
 		{
-			if(cityCode == undefined || cityCode == null)
-			{
-				cityCode = "HYD";
-			}
-			
-			if(eventName == undefined || eventName == null)
-			{
-				eventName = "Cocktail"; //Cocktail
-			}
-			
 			setDOMFromVars();
 		}
 		
 		function setDOMFromVars()
 		{
-			document.getElementById('cityCode').value = cityCode;
-			document.getElementById('eventName').value = eventName;
+			document.getElementById('cityCode').value = bkg.settings.cityCode;
+			document.getElementById('eventName').value = bkg.settings.eventName;
 		}
 		
 		function setVarsFromDom()
 		{
-			cityCode = document.getElementById('cityCode').value;
-			eventName = document.getElementById('eventName').value;
+			bkg.settings.cityCode = document.getElementById('cityCode').value;
+			bkg.settings.eventName = document.getElementById('eventName').value;
 		}
 		
 		function saveData()
 		{
 			setVarsFromDom();
-			localStorage["cityCode"] = cityCode;
-			localStorage["eventName"] = eventName;
+			localStorage["cityCode"] = bkg.settings.cityCode;
+			localStorage["eventName"] = bkg.settings.eventName;
 		}
 		
 	</script>

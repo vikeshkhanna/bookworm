@@ -1,9 +1,9 @@
 {
-  "name": "BookMyShow Notifications",
-  "version": "1.0",
-  "description": "Alert when a movie booking starts for on BookMyShow",
+  "name": "Bookworm",
+  "version": "1.4",
+  "description": "Alerts when the booking for your favorite movie starts on BookMyShow for your city",
   "browser_action": {
-    "default_icon": "images/icon19.gif" // optional
+    "default_icon": "images/icon19.gif" 
 	},
   
   "background_page": "background.html",

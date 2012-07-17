@@ -7,8 +7,13 @@
 		<script id="bms" type="text/javascript" src="http://in.bookmyshow.com/data/js/GetEvents_MT.js?20120717120045"> </script>
 	
 		<script>
-			var cityCode = localStorage["cityCode"];
-			var eventName = localStorage["eventName"];
+			settings = 
+			{
+				"cityCode" : localStorage["cityCode"],
+				"eventName" : localStorage["eventName"]
+			}
+			
+			
 			var audio;
 			var enabled = true;
 			
@@ -19,33 +24,34 @@
 			
 			
 			function request(url) {
-				console.log("<tdkr> ajax request received for " + url);
+				// console.log("<bookworm> ajax request received for " + url);
 				
 				var xhr = new XMLHttpRequest();
 				try {
 					xhr.onreadystatechange = function(){
 						if (xhr.readyState != 4)
 							{
-								console.log("<tdkr> ignoring xhr readystate = " + xhr.readyState);
+								console.log("<bookworm> ignoring xhr readystate = " + xhr.readyState);
 								return;
 							}
 
 						// When fetch is complete, check if the movie matches
 						if (xhr.responseText) {
-							console.log("<tdkr> responseText received");
+							console.log("<bookworm> responseText received");
 							eval(xhr.responseText);
 							
-							var movies = checkMovie(cityCode, eventName); 
+							var movies = checkMovie(settings.cityCode, settings.eventName); 
 							
 							if(movies !=null)
 							{
-								console.log("Movies Found!");
+								console.log("<bookworm> Movies Found!");
+								audio.currentTime = 0;
 								audio.play();
 								console.log(movies);
 								
 								for(var i=0; i< movies.length; ++i)
 								{
-									showToast("Tickets for " + movies[i] + " are now available. Book them quickly!");
+									showToast("Tickets for " + movies[i] + " are now available in " + settings.cityCode + ". Book them quickly!");
 								}
 								
 								toggleState();
@@ -54,7 +60,7 @@
 						}
 						else
 						{
-							console.debug("<tdkr> respnseText was empty");
+							console.debug("<bookworm> respnseText was empty");
 						}
 					}
 
@@ -74,15 +80,18 @@
 				audio = document.getElementById('audio');
 				audio.src = chrome.extension.getURL("audio/beware2.ogg");
 				
-				if(cityCode === undefined || cityCode == null)
+				if(settings.cityCode === undefined || settings.cityCode == null)
 				{
-					cityCode = "HYD";
+					settings.cityCode = "HYD";
+					localStorage["cityCode"] = settings.cityCode;
 				}
 				
-				if(eventName === undefined || eventName == null)
+				if(settings.eventName === undefined || settings.eventName == null)
 				{
-					eventName = "Cocktail"; //Cocktail for testing
+					settings.eventName = "Cocktail"; //Cocktail for testing
+					localStorage["eventName"] = settings.eventName;
 				}
+				
 				init_timer();
 				
 				chrome.browserAction.onClicked.addListener(function(tab) {  
@@ -99,7 +108,7 @@
 					
 					var url = "http://in.bookmyshow.com/data/js/GetEvents_MT.js?" + bustCache;
 					request(url);
-				}, 2000);
+				}, 20000);
 			}
 			
 			function getMovies(cityCode)
@@ -118,20 +127,24 @@
 				return arr;
 			}
 			
-			function checkMovie(cityCode, eventName)
+			function checkMovie(cityCode, eventNames)
 			{
 				var arr = getMovies(cityCode);
 				var movies = [];
 				var f = arr.toString().split(',');
-				eventName = eventName.toLowerCase();
-				console.log(f.toString());
+				eventNames = eventNames.toLowerCase();
+				arrEvents = eventNames.split(";");
+				console.log(arrEvents);
 				
 				for(var i=0; i < f.length; ++i)
 				{
-					if(f[i].toLowerCase().indexOf(eventName) != -1)
+					for(var j=0; j< arrEvents.length; ++j)
 					{
-						console.log("<bms> Adding " + f[i]);
-						movies.push(f[i]);
+						if(f[i].toLowerCase().indexOf(arrEvents[j].trim()) != -1)
+						{
+							console.log("<bookworm> Adding " + f[i]);
+							movies.push(f[i]);
+						}
 					}
 				}
 				//console.log(i);
@@ -161,14 +174,30 @@
 			
 			function toggleState()
 			{
-				enabled = ~enabled;
+				enabled = !enabled;
 				
-				if(enabled < 0)
+				if(!enabled)
+				{
+					do_disable();
+				}
+				else
+				{
+					do_enable();
+				}
+			}
+			
+			function do_disable()
+			{
+				if(!enabled)
 				{
 					chrome.browserAction.setIcon({path:"images/icon19_disabled.gif"});
 					clearInterval(timer);
 				}
-				else
+			}
+			
+			function do_enable()
+			{
+				if(enabled)
 				{
 					chrome.browserAction.setIcon({path:"images/icon19.gif"});
 					init_timer();
